@@ -1,1 +1,159 @@
 <h1>Sussy3</h1>
+
+<script type="main.js"></script>
+
+<!-- Creates a text area  -->
+<<textarea name="name" rows="1" cols="1"></textarea>>
+
+
+<!--
+
+Width=0
+Height=0
+Table={}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------ Split the table into sub tables containing width amount of colours
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+--big for loop = Store small tables in larger table
+DividedTable = {}
+for Y=1,#Table/Height,1 do
+	-- Intialise small table and reset it
+	local SmallTable = {}
+
+	for X=1,Width,1 do
+		SmallTable[X] = Table[X + ((Y-1)*Height)]
+	end
+
+	--Put the small table in the larger one
+	DividedTable[Y] = SmallTable
+end
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------ Replace isolated "-" with "?" [J - J] = [J ? J]
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+for TableAddress=1,#DividedTable,1 do
+
+	--Gather currently analyzed table
+	CurrentTable = DividedTable[TableAddress]
+
+	--Here we start at 2, cuz there is no point checking the first variable
+	-- as we need to compare the next and the previous one to this one
+	for X=1,#CurrentTable,1 do
+
+		--Gather previous, current and next values
+		Previous = CurrentTable[X-1]
+		Current  = CurrentTable[X]
+		Next	 = CurrentTable[X+1]
+
+
+		if TableAddress>1 and X<#CurrentTable then
+			--Only replace the first dash if the one in the previous table is not a -
+			if Next~='-' and Current=='-' and DividedTable[TableAddress-1][Width]~='-' and DividedTable[TableAddress-1][Width]~='?' and X==1 then
+				DividedTable[TableAddress][X] = '?'
+			end
+
+			--Only replace with a "?" if Next and Previous are not nils and are not -
+			if Current=='-' and (Previous~='-'and Previous~=nil) and (Next~='-'and Next~=nil) and X>1 then
+				DividedTable[TableAddress][X] = '?'
+			end
+
+		elseif X<#CurrentTable and TableAddress==1 then
+			--Check if the top left pixel if empty
+			if Next~='-' and Current=='-' and X==1 then DividedTable[TableAddress][X] = '?' end
+
+			print(X)
+
+			if Current=='-' and (Previous~='-'and Previous~=nil) and (Next~='-'and Next~=nil) and X>1 then
+				DividedTable[TableAddress][X] = '?'
+				print("HERE",DividedTable)
+			end
+
+
+		end
+	end
+
+end
+print(DividedTable)
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------ Find areas were line returns are needed
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+for TableAddress=2,#DividedTable,1 do
+	--Gather the previous line, and the first char of this line
+	PreviousLineEnd = DividedTable[TableAddress-1][Width]
+	CurrentLineStart= DividedTable[TableAddress][1]
+
+	--Check if entire previous line is just "-"
+	AllDashes = true
+	for i=1,Width,1 do
+		Checking = DividedTable[TableAddress-1][i]
+		if Checking~='-' then AllDashes = false end
+	end
+
+	--Check if the start of this line is different from a "-" and the end of the last line was "-"
+	if CurrentLineStart ~= "-" and PreviousLineEnd == "-" and AllDashes==false then
+		DividedTable[TableAddress-1][Width] = ":"
+		print(TableAddress-1,"[[[carriage return]]]]")
+	end
+end
+print(DividedTable)
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------ Convert into a string
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-- ADD the width to the start of the string
+Text    = ""
+Text    = Text.. ToBase64(Width)
+
+
+-- Initialisation of variables needed for next step
+Count   = 0
+Previous= DividedTable[1][1]
+Current = DividedTable[1][1]
+
+-- Read the entire table and count the amount of time we encounter stuff
+for TableAddress=1,#DividedTable,1 do
+
+	for i=1,Width,1 do
+		------------------------------------------------------------------------------------------ INCREASE COUNT
+		Count = Count + 1
+		------------------------------------------------------------------------------------------ READ CURRENT CHARACTER
+		Current = DividedTable[TableAddress][i]
+		------------------------------------------------------------------------------------------ READ NEXT CHARACTER
+		-- If the next character is in the other table
+		if i==Width and TableAddress<#DividedTable then
+			Next = DividedTable[TableAddress+1][1]
+		end
+		-- The next character is off bound
+		if i==Width and TableAddress==#DividedTable then
+			Next = nil
+		end
+		-- Normal next character conditions
+		if i<Width then
+			Next = DividedTable[TableAddress][i+1]
+		end
+
+		------------------------------------------------------------------------------------------ SPECIAL CHARACTER ":"
+		if Current == ':' or Current == '?' then
+
+			--Add to text
+			Text = Text .. Current
+
+			--Reset count
+			Count = 0
+
+		else
+		------------------------------------------------------------------------------------------ NORMAL  CHARACTERS
+			if Current ~= Next and not (Current=='-' and Next==nil) and not (Current=='-' and Next==':') then
+				----------------------------------------------------------------------- Next character is different
+				-- Add colour then count
+				Text = Text .. Current .. ToBase64(Count)
+				-- Reset Count
+				Count = 0
+			end
+		end
+
+	end
+end
+ -->
