@@ -42,6 +42,63 @@ function TableEncoder(drawnAreaTable, width, height) {
     dividedTable[y] = smallTable;
   }
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------ Find starting pixels and ending pixels and set Starting and Width as new values
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------
+	lenght       = table.length / width;
+
+	let letter   = 0;
+	var count    = 0;
+	var starting = -1;
+
+	for (var x = 0; x < dividedTable.length && starting==-1; x++)
+	{
+		for (var y = 0; y < width; y++)
+    {
+      letter = dividedTable[y][x];
+
+			//letter was not
+			if(letter != '-')
+			{
+				console.log("[BREAK]",count,letter);
+				starting = count;
+				break;
+			}
+    }
+		console.log("starting: ",count,letter);
+		//increase count
+		count++;
+	}
+	//--------------------------------------------------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------ Find the ending of the image, to reduce lenght variable.
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------
+	var ending = -1;
+			letter = 0;
+	var countB  = (table.length / width)-1;
+
+	for (var x = (dividedTable.length)-2; x >= 0 && ending == -1; x--)
+	{
+
+		for (var y = 0; y < width; y++)
+    {
+      letter = dividedTable[y][x];
+			//console.log("ENDING: ",countB,letter,x,y);
+			//letter was not
+			if(letter != '-')
+			{
+				ending = countB;
+				//console.log("[BREAK]",countB,letter,x,y);
+				break;
+			}
+    }
+			//increase count
+		countB = countB - 1;
+		//console.log("[DECREASE]");
+	}
+
+	console.log("[console]: image start point:",starting," end point: ",ending);
+
+
+	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------------------------------------ Replace isolated "-" with "?" [J - J] = [J ? J]
 	//--------------------------------------------------------------------------------------------------------------------------------------
   //console.log(dividedTable);
@@ -55,29 +112,29 @@ function TableEncoder(drawnAreaTable, width, height) {
     var tablelength = Object.keys(currentTable).length;
 
 		//Go through the elemets of that row
-		for (var x = 0; x < tablelength; x++)
+		for (var x = starting; x < ending; x++)
     {
 
 			//Gather previous, current and next values
 			var previous = currentTable[x - 1];
-			var current = currentTable[x];
-			var next = currentTable[x + 1];
-      console.log(tableAddress,x," CURRENTS: ",previous,current,next)
+			var current  = currentTable[x];
+			var next     = currentTable[x + 1];
+      //console.log(tableAddress,x," CURRENTS: ",previous,current,next)
       //console.log("previous: ",previous," current: ",current," next: ",next," INDEX: ",x)
 
 			if ((tableAddress > 0) && (x < tablelength-1)) {
 
 				//Only replace the first dash if the one in the previous row is not a dash
 				if ((next != '-') && (current == '-') && (dividedTable[tableAddress - 1][width-1] != '-') && (dividedTable[tableAddress - 1][width-1] != '?') && (x == 0)) { //////////////////////////////
-					console.log("[? ADDED 1]", x,tableAddress);
+					//console.log("[? ADDED 1]", x,tableAddress);
 
 					dividedTable[tableAddress][x] = '?';
-          console.log(dividedTable[tableAddress][x])
+          //console.log(dividedTable[tableAddress][x])
 				}
 
 				//Only replace with a "?" if the next character and the previous ones are neither nulls nor dashes
 				if ((current == '-') && ((previous != '-') && (previous != null)) && ((next != '-') && (next != null)) && (x > 0)) {
-					console.log("[? ADDED 2]");
+					//console.log("[? ADDED 2]");
 
 					dividedTable[tableAddress][x] = '?';
 				}
@@ -86,13 +143,13 @@ function TableEncoder(drawnAreaTable, width, height) {
 
 					//Check if the top left pixel is empty
 					if ((next != '-') && (current == '-') && (x == 0)) {
-					  console.log("[? ADDED 3]");
+					  //console.log("[? ADDED 3]");
 						dividedTable[tableAddress][x] = '?';
 					}
 
 					//Normal hole encoding for the first row
 					if ((current == '-') && ((previous != '-') && (previous != null)) && ((next != '-') && (next != null)) && (x > 0)) {
-					  console.log("[? ADDED 4]");
+					  //console.log("[? ADDED 4]");
 						dividedTable[tableAddress][x] = '?';
 					}
 				}
@@ -110,7 +167,7 @@ function TableEncoder(drawnAreaTable, width, height) {
 		//Check if the entire last row was filled with dashes
 		var allDashes = 1;
 
-		for (var i = 0; i < width; i++) {
+		for (var i = starting; i < ending; i++) {
 			//Current character of the previous row
 			var checking = dividedTable[tableAddress - 1][i];
 
@@ -137,13 +194,13 @@ function TableEncoder(drawnAreaTable, width, height) {
 	var previous = dividedTable[0][0];
 	var current = dividedTable[0][0];
 
-	//Add widths to the start of the string
-	text = text + ToBase64(width);
+	//Add Starting to the start of the string
+	text = text + ToBase64(starting+1) +  ToBase64(ending+1);
 
 	//read the entire table, row by row, and count the amount of times we encounter the same characters back to back.
 	for (var tableAddress = 0; tableAddress < dividedTable.length; tableAddress++) {
 		//Go through the elemets of that row
-		for (var i = 0; i < width; i++) {
+		for (var i = starting; i < ending; i++) {
 			/////////////////////////////////////////////////////////////////////////// Increase the encounter
 			count++;
 			/////////////////////////////////////////////////////////////////////////// Read the current character
