@@ -35,14 +35,18 @@ function TableEncoder(drawnAreaTable, width, height) {
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------------- Split the table into sub tables containing width amount of colours
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
+	console.log("");
+	console.log("------------[TABLE DIVISION]-------------");
+	console.log("[console]: --- lenght:",drawnAreaTable.length-1," height: ",height)
 	dividedTable = [[]];
-  for (var y = 0; y < (drawnAreaTable.length)/height; y++)
+  for (var y = 0; y < (drawnAreaTable.length-1)/height; y++)
   {
     var smallTable = {};
 
     for (var x = 0; x < width; x++)
     {
       smallTable[x] = table[x + (y*height)];
+			console.log("[console]: x:",x,"y:",y,"current:",table[x + (y*height)])
     }
 
     dividedTable[y] = smallTable;
@@ -50,6 +54,9 @@ function TableEncoder(drawnAreaTable, width, height) {
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------------------------------------ Find starting pixels and ending pixels and set Starting and Width as new values
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------
+	console.log("");
+	console.log("-------------[START AND END]-------------");
+
 	lenght       = table.length / width;
 
 	let letter   = 0;
@@ -58,6 +65,7 @@ function TableEncoder(drawnAreaTable, width, height) {
 
 	for (var x = 0; x < dividedTable.length && starting==-1; x++)
 	{
+		console.log("[console]: (start) Analyzed Row:",x);
 		for (var y = 0; y < width; y++)
     {
       letter = dividedTable[y][x];
@@ -65,12 +73,11 @@ function TableEncoder(drawnAreaTable, width, height) {
 			//letter was not
 			if(letter != '-')
 			{
-				console.log("[BREAK]",count,letter);
+				console.log("[console]: start found",count,"letter:",letter);
 				starting = count;
 				break;
 			}
     }
-		console.log("starting: ",count,letter);
 		//increase count
 		count++;
 	}
@@ -79,42 +86,42 @@ function TableEncoder(drawnAreaTable, width, height) {
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------
 	var ending = -1;
 			letter = 0;
-	var countB  = (table.length / width)-1;
+	var countB = ((table.length-1) / width)-1;
 
-	for (var x = (dividedTable.length)-2; x >= 0 && ending == -1; x--)
+	for (var x = (dividedTable.length)-1; x >= 0 && ending == -1; x--)
 	{
-
+		console.log("[console]: (end) Analyzed row:",x)
 		for (var y = 0; y < width; y++)
     {
       letter = dividedTable[y][x];
-			//console.log("ENDING: ",countB,letter,x,y);
 			//letter was not
 			if(letter != '-')
 			{
+				console.log("[console]: end found",countB,"letter:",letter)
 				ending = countB;
-				//console.log("[BREAK]",countB,letter,x,y);
 				break;
 			}
     }
 			//increase count
 		countB = countB - 1;
-		//console.log("[DECREASE]");
 	}
 
-	console.log("[console]: image start point:",starting," end point: ",ending);
+	ending = Math.floor(ending);
 
-
+/////////////////////////////////////////////////////////////////////////////////// CONSOL PRINTS
+	console.log("[console]: image start point:",starting," end point: ",ending, "original row lenght:",width-1);
+	console.log("");
+	console.log("-------------------[?]-------------------");
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------------------------------------ Replace isolated "-" with "?" [J - J] = [J ? J]
 	//--------------------------------------------------------------------------------------------------------------------------------------
-  //console.log(dividedTable);
 
-	for (var tableAddress = 0; tableAddress < dividedTable.length; tableAddress++) //Goes through smaller arrays
+	for (var tableAddress = 0; tableAddress < dividedTable.length; tableAddress++) //Goes through arrays
 	{
-		//Gather currently analyzed table (row
+		//Gather currently analyzed table (row)
     var currentTable = {};
 		currentTable = dividedTable[tableAddress];
-    //console.log("--------------------------------------------------------------------------",tableAddress,dividedTable[tableAddress],Object.keys(currentTable).length);
+		// Lenght of the table
     var tablelength = Object.keys(currentTable).length;
 
 		//Go through the elemets of that row
@@ -125,38 +132,43 @@ function TableEncoder(drawnAreaTable, width, height) {
 			var previous = currentTable[x - 1];
 			var current  = currentTable[x];
 			var next     = currentTable[x + 1];
-      //console.log(tableAddress,x," CURRENTS: ",previous,current,next)
-      //console.log("previous: ",previous," current: ",current," next: ",next," INDEX: ",x)
 
-			if ((tableAddress > 0) && (x < tablelength-1)) {
+			//Check to avoid replacement on first chars of the first table, and on the last ones
+			if ((tableAddress > 0) && (x < ending)) {
 
 				//Only replace the first dash if the one in the previous row is not a dash
 				if ((next != '-') && (current == '-') && (dividedTable[tableAddress - 1][width-1] != '-') && (dividedTable[tableAddress - 1][width-1] != '?') && (x == 0)) { //////////////////////////////
-					//console.log("[? ADDED 1]", x,tableAddress);
-
+					console.log("[console]:COND1:Original: ",x,dividedTable[tableAddress]);
 					dividedTable[tableAddress][x] = '?';
-          //console.log(dividedTable[tableAddress][x])
+					console.log("[console]:COND1:New:      ",x,dividedTable[tableAddress]);
+					console.log("");
 				}
 
 				//Only replace with a "?" if the next character and the previous ones are neither nulls nor dashes
 				if ((current == '-') && ((previous != '-') && (previous != null)) && ((next != '-') && (next != null)) && (x > 0)) {
-					//console.log("[? ADDED 2]");
 
+					console.log("[console]:COND2:Original: ",x,dividedTable[tableAddress]);
 					dividedTable[tableAddress][x] = '?';
+					console.log("[console]:COND2:New:      ",x,dividedTable[tableAddress]);
+					console.log("");
 				}
 			} else {
 				if ((x < tablelength-1) && (tableAddress == 0)) {
 
 					//Check if the top left pixel is empty
 					if ((next != '-') && (current == '-') && (x == 0)) {
-					  //console.log("[? ADDED 3]");
+						console.log("[console]:COND3:Original: ",x,dividedTable[tableAddress]);
 						dividedTable[tableAddress][x] = '?';
+						console.log("[console]:COND3:New:      ",x,dividedTable[tableAddress]);
+						console.log("");
 					}
 
 					//Normal hole encoding for the first row
 					if ((current == '-') && ((previous != '-') && (previous != null)) && ((next != '-') && (next != null)) && (x > 0)) {
-					  //console.log("[? ADDED 4]");
+						console.log("[console]:COND4:Original: ",x,dividedTable[tableAddress]);
 						dividedTable[tableAddress][x] = '?';
+						console.log("[console]:COND4:New:      ",x,dividedTable[tableAddress]);
+						console.log("");
 					}
 				}
 			}
@@ -165,28 +177,39 @@ function TableEncoder(drawnAreaTable, width, height) {
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------------------------------------ Find areas were line returns are needed
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
+	console.log("");
+	console.log("-------------------[:]-------------------");
+
 	for (var tableAddress = 1; tableAddress < dividedTable.length; tableAddress++) {
 		//Gather the last char of the previous row, aswell as the first char of the current row
-		var previousLineEnd = dividedTable[tableAddress - 1][width-1];
-		var currentLineStart = dividedTable[tableAddress][0];
-
+		var previousLineEnd = dividedTable[tableAddress - 1][ending];
+		var currentLineStart = dividedTable[tableAddress][starting];
+		console.log("[console]: Last line:",previousLineEnd," current line:",currentLineStart)
 		//Check if the entire last row was filled with dashes
 		var allDashes = 1;
-
-		for (var i = starting; i < ending; i++) {
-			//Current character of the previous row
-			var checking = dividedTable[tableAddress - 1][i];
+		for (var i = starting; i <= ending && allDashes==1; i++) {
 
 			//Previous line wasn't only dashes
-			if (checking != '-') {
+			if (dividedTable[tableAddress - 1][i] != '-') {
+				console.log("[console]: previous row was not all dashes");
 				allDashes = 0;
 			}
+		}
+
+		if( allDashes == 0)
+		{
+			console.log("[console]: Previous:",dividedTable[tableAddress - 1]);
+			console.log("[console]: Current: ",tableAddress,dividedTable[tableAddress]);
+			console.log("[console]: condition:",(currentLineStart != '-'),(previousLineEnd == '-'),(allDashes == 0))
 		}
 
 		//Check if the start of this row is now a dash and check if the end of the last row isnt a dash either.
 		if ((currentLineStart != '-') && (previousLineEnd == '-') && (allDashes == 0)) {
 			//Place a carriage return in that specific table spot
-			dividedTable[tableAddress - 1][width-1] = ':';
+			console.log("[console]:COND1:Original:",dividedTable[tableAddress - 1]);
+			dividedTable[tableAddress - 1][ending] = ':';
+			console.log("[console]:COND1:New     :",dividedTable[tableAddress - 1]);
+			console.log("");
 		}
 	}
 
@@ -194,52 +217,68 @@ function TableEncoder(drawnAreaTable, width, height) {
 	//------------------------------------------------------------------------------ Convert into a string
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 
+	console.log("");
+	console.log("----------------[STRINGS]----------------");
+
 	//Initialise variables for string convertion
 	var text = "";
 	var count = 0;
-	var previous = dividedTable[0][0];
-	var current = dividedTable[0][0];
+	var previous = dividedTable[0][starting];
+	var current = dividedTable[0][starting];
 
 	//Add Starting to the start of the string
-	text = text + ToBase64(starting+1) +  ToBase64(ending+1);
+	text = text + ToBase64(starting+1) + ToBase64(ending+1);
 
 	//read the entire table, row by row, and count the amount of times we encounter the same characters back to back.
 	for (var tableAddress = 0; tableAddress < dividedTable.length; tableAddress++) {
 		//Go through the elemets of that row
-		for (var i = starting; i < ending; i++) {
+		for (var i = starting; i <= ending; i++) {
 			/////////////////////////////////////////////////////////////////////////// Increase the encounter
 			count++;
 			/////////////////////////////////////////////////////////////////////////// Read the current character
 			current = dividedTable[tableAddress][i];
+				console.log("[console]: current: ",current,i, "count:",count)
 			/////////////////////////////////////////////////////////////////////////// Read the next character
 			// If the next character is in the next table
-			if ((i == width - 1) && (tableAddress < dividedTable.length - 1)) {
-				next = dividedTable[tableAddress + 1][0];
+			if ((i == ending ) && (tableAddress < dividedTable.length - 1)) {
+				console.log("[console]: next:    ",next,starting, "count:",count)
+				console.log("")
+				next = dividedTable[tableAddress + 1][starting];
 			}
 
 			// If the next character is off the table (address would be outside of table maximum)
-			if ((i == width - 1) && (tableAddress == dividedTable.length - 1)) {
+			if ((i == ending ) && (tableAddress == dividedTable.length - 1)) {
+				console.log("[console]: null: ");
 				next = null;
 			}
 
-			//Normal character conditions
-			if (i < width - 1) {
+			//Normal character conditions, the next character is not null
+			if (i < ending ) {
+
 				next = dividedTable[tableAddress][i + 1];
+				console.log("[console]: next:    ",next,i+1, "count:",count)
+				console.log("")
 			}
 
         	/////////////////////////////////////////////////////////////////////////// Special character ":" / "?"
 			if ((current == ':') || (current == '?')) {
 				//Add current to Text
 				text = text + current;
-
+				console.log("[console]: (SPECIAL) ",current," added");
 				//Reset counter
 				count = 0;
 			}
 			/////////////////////////////////////////////////////////////////////////// Normal CHARACTERS
 			else {
+				//condition: current letter is different than the next one.
+				//					 if current letter is equal to '-' and next one is null, then it won't execute
+				//					 if current letter is equal to '-' and the next one is a ':' it won't execute neither
+				//					 But, if the count is bigger than 72, it will enter this function no matter.
 				if (((current != next) && !((current == '-') && (next == null)) && !(current == '-' && next == ':')) || (count>72)) {
 					/////////////////////////////////////////////////////////////////////////// Next character is different, and isn't ? or :
 					//Add colours then lenght in base64
+					console.log("[console]: --- LETTER ADDED ---",current,ToBase64(count)," count was:",count);
+					console.log("[console]: --- LETTER ADDED --- CONDS:",(current != next),!((current == '-') && (next == null)),!(current == '-' && next == ':'));
 					text = text + current + ToBase64(count);
 					//Reset the counter
 					count = 0;
