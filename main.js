@@ -10,6 +10,12 @@ function test() {
 	outputBox.value = outputStr
 }
 
+
+function yourmother() {
+	console.log("is fat")
+}
+
+
 const BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/!@#_~|&*-:=?";
 
 function ToBase64(position)
